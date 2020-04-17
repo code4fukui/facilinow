@@ -30,13 +30,13 @@ const main = async function() {
     let td = cr('td')
     const n = util.rnd(2)
     td.textContent = n ? '開館中' : '閉館中'
-    td.style.backgroundColor = n ? '#f88' : '#aaa'
+    td.style.backgroundColor = n ? '#f88' : '#ccc'
     tr.appendChild(td)
 
     td = cr('td')
     const flg = d['混雑状況（空いている:0、混雑している:1）'] == 1
     td.textContent = flg ? '混雑' : '空き'
-    td.style.backgroundColor = flg ? '#f88' : '#aaa'
+    td.style.backgroundColor = flg ? '#f88' : '#ccc'
     tr.appendChild(td)
 
     td = cr('td')
