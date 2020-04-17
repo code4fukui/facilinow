@@ -1,39 +1,38 @@
-/* fukuno.js CC BY @taisuke */
+/* util.mjs CC BY @taisuke */
 
-var get = function(id) {
-	return document.getElementById(id);
-};
-var create = function(tag, cls) {
+const util = {}
+
+util.cr = function(tag, cls) {
 	var res = document.createElement(tag);
 	if (cls != null)
 		res.className = cls;
 	return res;
-};
-var clear = function(id) {
+}
+util.clear = function(id) {
 	var div = typeof id == "string" ? get(id) : id;
 	while (div.hasChildNodes()) {
 		div.removeChild(div.lastChild);
 	}
 	div.scrollTop = 0;
 	div.scrollLeft = 0;
-};
-var removeAllChild = function(div) {
+}
+util.removeAllChildren = function(div) {
 	while (div.hasChildNodes()) {
-		div.removeChild(div.lastChild);
+		div.removeChild(div.lastChild)
 	}
-};
-var rnd = function(n) {
+}
+util.rnd = function(n) {
 	return Math.floor(Math.random() * n);
 };
-var shuffle = function(array) {
+util.shuffle = function(array) {
 	for (var i = 0; i < array.length; i++) {
 		var n = rnd(array.length);
 		var tmp = array[i];
 		array[i] = array[n];
 		array[n] = tmp;
 	}
-};
-var addComma = function(num, beam) {
+}
+util.addComma = function(num, beam) {
 	var flg = num < 0;
 	if (flg)
 		num = -num;
@@ -50,8 +49,8 @@ var addComma = function(num, beam) {
 		s += "." + fixnum(Math.floor(f * Math.pow(10, beam)), beam);
 	}
 	return (flg ? "-" : "") + s;
-};
-var removeComma = function(s, b) {
+}
+util.removeComma = function(s, b) {
 	if (s.length == 0)
 		return s;
 	var s2 = s.replace(/,/g, "");
@@ -59,12 +58,12 @@ var removeComma = function(s, b) {
 	if (!isNaN(n))
 		return n;
 	return s;
-};
-var fixnum = function(n, m) {
+}
+util.fixnum = function(n, m) {
 	var s = '00000000000000000' + n;
 	return s.substring(s.length - m);
-};
-var fixfloat = function(d, beam) {
+}
+util.fixfloat = function(d, beam) {
 	if (beam == 0)
 		return Math.floor(d);
 	var minus = "";
@@ -79,8 +78,8 @@ var fixfloat = function(d, beam) {
 	var m = Math.floor(d % k);
 	var s = Math.floor(d / k);
 	return minus + s + "." + fixnum(m, beam);
-};
-var dec2hex = function(n, beam) {
+}
+util.dec2hex = function(n, beam) {
 	var hex = "";
 	for (var i = 0; i < beam; i++) {
 		var m = n & 0xf;
@@ -89,8 +88,8 @@ var dec2hex = function(n, beam) {
 		n >>= 4;
 	}
 	return hex;
-};
-var hex2bin = function(s) {
+}
+util.hex2bin = function(s) {
 	var res = '';
 	for (var i = 0; i < s.length; i++) {
 		var n = '0123456789abcdef'.indexOf(s.charAt(i));
@@ -101,11 +100,8 @@ var hex2bin = function(s) {
 		}
 	}
 	return res;
-};
-var f2s = function(f) {
-	return f.toString().match(/\n([\s\S]*)\n/)[1];
-};
-var createImage = function(s, cr, cg, cb) {
+}
+util.createImage = function(s, cr, cg, cb) {
 	if (cr == null) {
 		cr = cg = cb = 0;
 	}
@@ -138,7 +134,7 @@ var createImage = function(s, cr, cg, cb) {
 	ctx.putImageData(data, 0, 0);
 	return canvas.toDataURL("image/png");
 };
-var jsonp = function(url, callback) {
+util.jsonp = function(url, callback) {
 	var head = document.getElementsByTagName("head")[0];
 	var script = document.createElement("script");
 	if (callback) {
@@ -153,40 +149,16 @@ var jsonp = function(url, callback) {
 	script.setAttribute("type", "text/javascript");
 //	script.setAttribute("id", 'jsonp');
 	head.appendChild(script);
-};
-var getCallbackMethod = function(callback) {
+}
+util.getCallbackMethod = function(callback) {
 	var scallback = "_cb_" + (Math.random() * 1000000 >> 0);
 	window[scallback] = function(data) {
 		window[scallback] = null;
 		callback(data);
 	};
 	return scallback;
-};
-var getXHR = function() {
-	if (window.XDomainRequest)
-		return new XDomainRequest();
-	if (window.XMLHttpRequest)
-		return new XMLHttpRequest();
-	if (window.ActiveXObject)
-		return new ActiveXObject("Microsoft.XMLHTTP");
-	return null;
-};
-var ajax = function(url, callback) {
-	var data = "";
-	var method = "GET";
-	var async = true;
-	var xhr = getXHR();
-	xhr.open(method, url, async);
-	xhr.onreadystatechange = function() {
-		if (xhr.readyState == 4) {
-			var xml = xhr.responseXML;
-			callback(xml);
-		}
-	}
-	xhr.setRequestHeader("If-Modified-Since", "Thu, 01 Jun 1970 00:00:00 GMT");
-	xhr.send(data);
-};
-var xml2json = function(xml) { // attribute無視、名前重なったら配列化
+}
+util.xml2json = function(xml) { // attribute無視、名前重なったら配列化
 	var f = function(xml) {
 		var json = {};
 		var text = [];
@@ -212,8 +184,8 @@ var xml2json = function(xml) { // attribute無視、名前重なったら配列�
 		return hasxml ? json : text.join("");
 	};
 	return f(xml);
-};
-var debug = function(s) {
+}
+util.debug = function(s) {
 	var d = get('debug');
 	if (d == null) {
 		d = create('div');
@@ -223,14 +195,14 @@ var debug = function(s) {
 //	d.textContent = s;
 	d.innerHTML = s;
 };
-var dump = function(o, name, target) { // default: div id=dump
+util.dump = function(o, name, target) { // default: div id=dump
 	if (target == null) {
 		debug("");
 		target = get('debug');
 	}
-	dumpInner(o, name, 0, target);
-};
-var dumpInner = function(o, name, depth, target) {
+	util.dumpInner(o, name, 0, target);
+}
+util.dumpInner = function(o, name, depth, target) {
 	if (name == null)
 		name = "";
 	for (var n in o) {
@@ -249,8 +221,8 @@ var dumpInner = function(o, name, depth, target) {
 			target.appendChild(div);
 		}
 	}
-};
-var dumpxml = function(xml, comp) {
+}
+util.dumpXML = function(xml, comp) {
 	if (comp == null) {
 		debug("");
 		comp = get('debug');
@@ -280,8 +252,8 @@ var dumpxml = function(xml, comp) {
 		}
 	};
 	f(xml, 0);
-};
-var getLanguage = function() {
+}
+util.getLanguage = function() {
 	try {
 		return (navigator.browserLanguage || navigator.language || navigator.userLanguage).substr(0, 2)
 	} catch(e) {
@@ -289,7 +261,7 @@ var getLanguage = function() {
 	return "en";
 }
 // color util hsb2rgb rgb2hsv
-var rgb2hsv = function(rr, gg, bb) {
+util.rgb2hsv = function(rr, gg, bb) {
 	var hsv = [ 0, 0, 0 ];
 	var r = rr / 255;
 	var g = gg /255;
@@ -309,8 +281,8 @@ var rgb2hsv = function(rr, gg, bb) {
 	}
 	hsv[2] = max;
 	return hsv;
-};
-var hsv2rgb = function(h, s, v) {
+}
+util.hsv2rgb = function(h, s, v) {
 	while (h < 0)
 		h += 360;
 	h %= 360;
@@ -340,18 +312,18 @@ var hsv2rgb = function(h, s, v) {
 	rgb[1] = rgb[1] * 255 >> 0;
 	rgb[2] = rgb[2] * 255 >> 0;
 	return rgb;
-};
-var rgb2css = function(r, g, b) {
+}
+util.rgb2css = function(r, g, b) {
 	if (typeof r == 'object') {
 		g = r[1];
 		b = r[2];
 		r = r[0];
 	}
 	return "#" + dec2hex(r, 2) + dec2hex(g, 2) + dec2hex(b, 2);
-};
+}
 
 // ui (mouse & touch)
-var setUI = function(comp) { // onuidown, onuimove, onuiup
+util.setUI = function(comp) { // onuidown, onuimove, onuiup
 	var istouch = 'ontouchstart' in window;
 	var usecapture = false;
 	if (istouch) {
@@ -394,7 +366,7 @@ var setUI = function(comp) { // onuidown, onuimove, onuiup
 	}, usecapture);
 };
 // canvas
-var getContext = function(canvas) {
+util.getContext = function(canvas) {
 	var g = canvas.getContext("2d");
 	g.canvas1 = canvas;
 	g.ratio = 1;
@@ -474,25 +446,17 @@ var getContext = function(canvas) {
 		this.drawArrow(x1, y1, x2, y2, arw, arh, true);
 	};
 	return g;
-};
+}
 
 // net util
 
-var parseInt2 = function(n) {
+util.parseInt2 = function(n) {
 	var n = parseInt(n);
 	if (isNaN(n))
 		return "-";
 	return n;
-};
-var xml2json = function(url, callback) {
-	var host = "fukuno.jig.jp";
-//	var host = "localhost:8080";
-//	var host = "sabae.club";
-	var base = "https://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=xml2json";
-	var url2 = base + "&cache=no&callback=" + getCallbackMethod(callback) + "&url=" + encodeURI(url);
-	jsonp(url2);
-};
-const decodeCSV = function(s) {
+}
+util.decodeCSV = function(s) {
 	const res = []
 	let st = 0
 	let line = []
@@ -562,9 +526,23 @@ const decodeCSV = function(s) {
 		res.push(line)
 	return res
 }
-const csv2json = function(csv) {
+util.csv2json = function(csv) {
 	const res = []
 	const head = csv[0]
+	for (let i = 0; i < head.length; i++) {
+		const h = head[i]
+		const n = h.indexOf('(')
+		const m = h.indexOf('（')
+		let l = -1
+		if (n == -1) {
+			l = m
+		} else if (m == -1) {
+			l = n
+		} else {
+			l = Math.min(n, m)
+		}
+		head[i] = (l > 0 ? h.substring(0, l) : h).trim()
+	}
 	for (let i = 1; i < csv.length; i++) {
 		const d = {}
 		for (let j = 0; j < head.length; j++) {
@@ -574,49 +552,7 @@ const csv2json = function(csv) {
 	}
 	return res
 }
-var getJSON = function(url, callback, enc) {
-	if (url.endsWith(".csv")) {
-		getRawJSON(url, enc ? enc : "SJIS", function(csv) {
-			callback(convertCSVtoArray(csv));
-		});
-	} else if (url.endsWith(".xml") || url.endsWith(".rdf")) {
-		getXMLJSON(url, callback);
-	} else {
-		alert("not support type : " + url);
-	}
-};
-var getXMLJSON = function(url, callback) {
-//	var host = "sabae.club";
-	var host = "fukuno.jig.jp";
-	var cnv = "xml2json";
-	var base = "https://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=" + cnv;
-	var url2 = base + "&cache=no&callback=" + getCallbackMethod(callback) + "&url=" + encodeURI(url);
-	jsonp(url2);
-};
-var getRawJSON = function(url, srcenc, callback) {
-	//var host = "sabae.club";
-//	host = "localhost:8080";
-	var host = "fukuno.jig.jp";
-	var cache = "no";
-	var base = "https://" + host + "/proxy/ITqT5WkhCf2yn1s9?";
-	var url2 = base + "cnv=json&srcenc=" + srcenc + "&cache="  + cache + "&callback=" + getCallbackMethod(callback) + "&url=" + encodeURIComponent(url);
-	jsonp(url2);
-};
-var getResizedImageURL = function(url, w, h) {
-//	var host = "sabae.club";
-	var host = "fukuno.jig.jp";
-	var base = "https://" + host + "/proxy/ITqT5WkhCf2yn1s9?cnv=jpeg-rs-" + w + "x" + h;
-	var url2 = base + "&cache=yes&url=" + encodeURI(url);
-	return url2;
-};
-
-var getMapLink = function(lat, lng) {
-	return "https://maps.google.com/?ll=" + lat + "," + lng;
-};
-var getSearchLink = function(s) {
-	return "https://search.yahoo.co.jp/search?tt=c&ei=UTF-8&fr=sfp_as&aq=-1&oq=&p=" + encodeURIComponent(s) + "&meta=vc%3D";
-};
-var getLastDayOfMonth = function(year, month) {
+util.getLastDayOfMonth = function(year, month) {
 	if (month == 0) {
 		month = 12;
 		year--;
@@ -629,7 +565,7 @@ var getLastDayOfMonth = function(year, month) {
 		return 28;
 	}
 	return 30 + (month + Math.floor(month / 8)) % 2;
-};
-const fetchCSVtoJSON = async url => csv2json(decodeCSV(await (await fetch(url)).text()))
+}
+util.fetchCSVtoJSON = async url => util.csv2json(util.decodeCSV(await (await fetch(url)).text()))
 
-export default { csv2json, decodeCSV, addComma, fixfloat, shuffle, rnd, fetchCSVtoJSON }
+export default util
