@@ -241,13 +241,13 @@ const main = async function() {
     tbl.appendChild(tr)
   }
   mainc.appendChild(tbl)
-  
+
   seldt.value = util.formatYMDHMS(new Date())
   const show = function(now) {
     console.log(now)
     for (const d of data) {
       const n = isOpeningDays(now, holiday, d['休館日'], d['年末年始'], d['臨時休館日']) && isOpeningMinutes(now, d['開館時間'])
-      console.log(n)
+      //console.log(n)
       d.opening.setOpening(n)
       d.status.textContent = '-'
       d.status.style.backgroundColor = '#ccc'
@@ -316,7 +316,7 @@ td, #mainc th {
   font-size: 70%;
 }
 #src {
-	margin: .5em;
+	margin: 1.5em 0 .5em 0;
 }
 #materials a {
   margin-left: 1em;
@@ -335,11 +335,8 @@ a {
 <div id="link">
 
 <div id="src">
-  <!--
-DATA: CC BY 「<a href=https://fukuno.jig.jp/2820>時間割ガチャ - 教材オープンデータあつめ始めました</a>」 <a href=data/funs.csv>CSV</a> / <a href=data/funs.json>JSON</a><br>
-Educatino Materials: <span id='materials'></span><br>
-APP：CC BY <a href='https://fukuno.jig.jp/2820'>fukuno.jig.jp</a> <a href=https://github.com/code4fukui/timetable/>src on GitHub</a><br>
-  -->
+<div>DATA: CC BY 福井県庁 <a href=data/fukui.csv>福井県施設CSVオープンデータ</a> / CC BY 日本政府 <a href=data/holiday_jp.csv>国民の祝日CSVオープンデータ</a></div>
+<div>APP：CC BY <a href='https://fukuno.jig.jp/'>fukuno.jig.jp</a> (<a href=https://github.com/code4fukui/facilinow/>src on GitHub</a>)</div>
 </div>
 <img id=qrcode><script>addEventListener("load", () => qrcode.src = "https://chart.apis.google.com/chart?chs=140x140&cht=qr&chl=" + encodeURIComponent(document.location))</script><br>
 
