@@ -600,7 +600,4 @@ util.formatYMD = function(t) {
 	return t.getFullYear() + "-" + fix0(t.getMonth() + 1, 2) + "-" + fix0(t.getDate(), 2)
 }
 
-util.formatYMD = function(t) {
-}
-
 export default util
