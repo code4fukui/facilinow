@@ -599,5 +599,13 @@ util.formatYMD = function(t) {
   const fix0 = util.fix0
 	return t.getFullYear() + "-" + fix0(t.getMonth() + 1, 2) + "-" + fix0(t.getDate(), 2)
 }
+util.addBOM = function(s) {
+	return '\ufeff' + s
+}
+util.removeBOM = function(s) {
+	if (s.charAt(0) == '\ufeff')
+		return s.substring(1)
+	return s
+}
 
 export default util
