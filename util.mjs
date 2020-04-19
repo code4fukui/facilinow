@@ -23,7 +23,22 @@ util.removeAllChildren = function(div) {
 }
 util.rnd = function(n) {
 	return Math.floor(Math.random() * n);
-};
+}
+util.toHalf = function(s) {
+  const ZEN = "０１２３４５６７８９（）／"
+  const HAN = "0123456789()/"
+  let s2 = ""
+  for (let i = 0; i < s.length; i++) {
+    const c = s.charAt(i)
+    const n = ZEN.indexOf(c)
+    if (n >= 0) {
+      s2 += HAN.charAt(n)
+    } else {
+      s2 += c
+    }
+  }
+  return s2
+}
 util.shuffle = function(array) {
 	for (var i = 0; i < array.length; i++) {
 		var n = rnd(array.length);
@@ -567,5 +582,25 @@ util.getLastDayOfMonth = function(year, month) {
 	return 30 + (month + Math.floor(month / 8)) % 2;
 }
 util.fetchCSVtoJSON = async url => util.csv2json(util.decodeCSV(await (await fetch(url)).text()))
+
+util.fix0 = function(n, beam) {
+  const s = "000000000" + n
+  return s.substring(s.length - beam)
+}
+util.formatYMDHMS = function(t) {
+	if (!t)
+		t = new Date()
+  const fix0 = util.fix0
+  return t.getFullYear() + "-" + fix0(t.getMonth() + 1, 2) + "-" + fix0(t.getDate(), 2) + "T" + fix0(t.getHours(), 2) + ":" + fix0(t.getMinutes(), 2) + ":" + fix0(t.getSeconds(), 2)
+}
+util.formatYMD = function(t) {
+	if (!t)
+		t = new Date()
+  const fix0 = util.fix0
+	return t.getFullYear() + "-" + fix0(t.getMonth() + 1, 2) + "-" + fix0(t.getDate(), 2)
+}
+
+util.formatYMD = function(t) {
+}
 
 export default util
