@@ -1,0 +1,123 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="apple-touch-icon" href="facilinow.png"/>
+<meta property="og:image" content="facilinow.png"/>
+<meta name="format-detection" content="telephone=no"/>
+<title>ゲンキーボタン</title>
+<script type='module'>
+
+import util from './util.mjs'
+
+const main = async function() {
+  for (let i = 0; i < 2; i++) {
+    for (let j = 0; j < 2; j++) {
+      const name = 'b' + i + "_" + j
+      const c = document.getElementById(name)
+      c.setFlag = function(b) {
+        this.flg = b
+        this.style.backgroundColor = this.flg ? "red" : "#ccc"
+      }
+      c.onclick = function() {
+        this.setFlag(!this.flg)
+        if (this.flg) {
+          const n = this.id.match(/b(\d)_(\d)/)
+          for (let i = 0; i < 2; i++) {
+            if (i != n[2]) {
+              const name = 'b' + n[1] + "_" + i
+              document.getElementById(name).setFlag(false)
+            }
+          }
+        }
+      }
+    }
+  }
+}
+window.onload = main
+
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	margin: 0;
+  word-wrap: break-word;
+  --main-color: #66ACDE;
+  text-align: center;
+}
+h1 {
+	margin: 0;
+	padding: .0em;
+	background-color: var(--main-color);
+	color: white;
+	font-size: 8vw;
+	text-align: center;
+}
+h2 {
+  font-size: 3vw;
+}
+.subtitle {
+	text-align: center;
+	margin: 0;
+	padding: .3em;
+	background-color: var(--main-color);
+	color: white;
+	font-size: 3vw;
+}
+/* main */
+.btns > div {
+  margin: 1em;
+}
+.btitle {
+  font-size: 5vw;
+}
+.yn > div {
+  display: inline-block;
+  width: 30vw;
+  height: 10vh;
+  border: .5vw solid var(--main-color);
+  margin: 1vw;
+  padding: 1vw;
+  font-size: 3vw;
+  text-align: center;
+  line-height: 10vh;
+  background-color: #ccc;
+}
+/* footer */
+#debug {
+  border: 1px solid black;
+  margin: 1em;
+  padding: 0.5em;
+  font-size: 70%;
+}
+#src {
+	margin: 1.5em 0 .5em 0;
+}
+a {
+	color: gray !important;
+}
+</style>
+</head>
+<body>
+
+<h1 id=title>ゲンキーボタン</h1><div class=subtitle>マスクの在庫状況、混雑状況を伝えるアプリ</div>
+
+<div class=btns>
+  <div>
+    <div class=btitle>マスクの在庫</div>
+    <div class=yn><div id=b0_1>在庫あり</div><div id=b0_0>在庫なし</div></div>
+  </div>
+  <div>
+    <div class=btitle>混雑状況</div>
+    <div class=yn><div id=b1_1>混雑している</div><div id=b1_0>空いてる</div></div>
+  </div>
+</div>
+
+<div id="link">
+  <div id="src">
+    <div>DATA: <a href=http://www.genky.co.jp/shop/index.php>ドラッグストア ゲンキ― > 店舗・チラシ検索</a> を<a href=https://code4fukui.github.io/facilinow/data/genky.csv>CSV</a>に加工</div>
+    <div>APP：CC BY <a href='https://fukuno.jig.jp/'>fukuno.jig.jp</a> (<a href=https://github.com/code4fukui/facilinow/>src on GitHub</a>)</div>
+  </div>
+  <img id=qrcode><script>addEventListener("load", () => qrcode.src = "https://chart.apis.google.com/chart?chs=140x140&cht=qr&chl=" + encodeURIComponent(document.location))</script><br>
+</div>
+
+</body>
+</html>
