@@ -242,8 +242,8 @@ util.cutNoneN = function(s) {
   return n
 }
 util.toHalf = function(s) {
-  const ZEN = "０１２３４５６７８９（）／"
-  const HAN = "0123456789()/"
+  const ZEN = "０１２３４５６７８９（）／ー！＆：　ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ"
+  const HAN = "0123456789()/-!&: abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
   let s2 = ""
   for (let i = 0; i < s.length; i++) {
     const c = s.charAt(i)
@@ -403,6 +403,7 @@ util.parseDLsFromHTML = function(html) {
   return tbls
 }
 util.fetchCSVtoJSON = async url => util.csv2json(util.decodeCSV(await util.fetchText(url)))
+util.sleep = async msec => new Promise(resolve => setTimeout(resolve, msec))
 
 const main = async function() {
   
