@@ -1,0 +1,136 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="apple-touch-icon" href="facilinow.png"/>
+<meta property="og:image" content="facilinow.png"/>
+<meta name="format-detection" content="telephone=no"/>
+<title>ゲンキーマップ</title>
+<link rel='stylesheet' href='leaflet/leaflet.css'/>
+<script type='module'>
+
+import L from './leaflet/leaflet-module.mjs'
+import util from './util.mjs'
+
+const main = async function() {
+  const map = L.map('mapid')
+  L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png", {
+		attribution: '<a href="https://maps.gsi.go.jp/development/ichiran.html">国土地理院</a>"',
+		maxZoom: 18,
+  }).addTo(map)
+
+  const data = await util.fetchCSVtoJSON('data/genkey.csv')
+
+  const pref = util.unique(data.map(i => i['所在地'].substring(0, 3)))
+  let s = ''
+  const chks = {}
+  for (let i = 0; i < pref.length; i++) {
+    const p = pref[i]
+    const n = data.reduce((acc, cur) => acc + (cur['所在地'].startsWith(p) ? 1 : 0), 0)
+    const l = util.cr('label')
+    const checked = p == '福井県' ? 'checked' : ""
+    l.innerHTML = `<input type=checkbox ${checked} id=chk${i} value="${p}"">${p} ${n}店舗 `
+    checks.appendChild(l)
+    const chk = l.children[0]
+    chks[p] = chk
+  }
+
+  let iconlayer = L.layerGroup()
+  iconlayer.addTo(map)
+  let icons = []
+  const show = async function() {
+    icons.forEach(i => iconlayer.removeLayer(i))
+    icons = []
+    const lls = []
+    for (const item of data) {
+      const p = item.所在地.substring(0, 3)
+      if (!chks[p].checked)
+        continue
+      const lat = item.緯度
+      const lng = item.経度
+      const name = item.店舗名
+      const ll = [ lat, lng ]
+      const marker = L.marker(ll, { title: name })
+      marker.bindPopup(`<a target=_blank href=${item.URL}>${name}</a>`)
+      iconlayer.addLayer(marker)
+      lls.push(ll)
+      icons.push(marker)
+    }
+    if (lls.length)
+      map.fitBounds(lls)
+  }
+  show()
+
+  for (const c in chks) {
+    chks[c].onclick = show
+  }
+}
+window.onload = main
+
+</script>
+<style>
+body {
+	font-family: sans-serif;
+	margin: 0;
+  word-wrap: break-word;
+  --main-color: rgb(78, 145, 66);
+  text-align: center;
+}
+h1 {
+	margin: 0;
+	padding: .0em;
+	background-color: var(--main-color);
+	color: white;
+	font-size: 8vw;
+	text-align: center;
+}
+h2 {
+  font-size: 3vw;
+}
+.subtitle {
+	text-align: center;
+	margin: 0;
+	padding: .3em;
+	background-color: var(--main-color);
+	color: white;
+	font-size: 3vw;
+}
+/* main */
+#mapid {
+  width: 100%;
+  height: 50vw;
+}
+.leaflet-tile-container { /* 地図の色味変更 CSS3 filter */
+    x-filter: sepia(100%) brightness(95%); /* セピア */
+    x-filter: grayscale(100%) brightness(110%); /* 明るめグレースケール */
+    filter: hue-rotate(-10deg) saturate(70%) brightness(104%); /* いい感じの色？ */
+}
+/* footer */
+#debug {
+  border: 1px solid black;
+  margin: 1em;
+  padding: 0.5em;
+  font-size: 70%;
+}
+#src {
+	margin: 1.5em 0 .5em 0;
+}
+a {
+	color: gray !important;
+}
+</style>
+</head>
+<body>
+
+<h1 id=title>ゲンキーマップ</h1><div class=subtitle>ドラッグストア「ゲンキー」店舗をマップ表示</div>
+<div id='checks'></div>
+<div id="mapid"></div>
+
+<div id="link">
+  <div id="src">
+    <div>DATA: <a href=http://www.genky.co.jp/shop/index.php>ドラッグストア ゲンキ― > 店舗・チラシ検索</a> を<a href=https://code4fukui.github.io/facilinow/data/genkey.csv>CSV</a>に加工</div>
+    <div>APP：CC BY <a href='https://fukuno.jig.jp/'>fukuno.jig.jp</a> (<a href=https://github.com/code4fukui/facilinow/>src on GitHub</a>)</div>
+  </div>
+  <img id=qrcode><script>addEventListener("load", () => qrcode.src = "https://chart.apis.google.com/chart?chs=140x140&cht=qr&chl=" + encodeURIComponent(document.location))</script><br>
+</div>
+
+</body>
+</html>

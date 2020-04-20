@@ -607,5 +607,6 @@ util.removeBOM = function(s) {
 		return s.substring(1)
 	return s
 }
+util.unique = ar => ar.filter((cur, idx, self) => self.indexOf(cur) == idx)
 
 export default util
