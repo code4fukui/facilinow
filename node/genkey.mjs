@@ -1,7 +1,7 @@
 import util from './util.mjs'
 import cheerio from 'cheerio'
 import fetch from 'node-fetch'
-
+import fs from 'fs'
 
 const parseTableItems = function(dom, tbl) {
   const item = {}
@@ -68,11 +68,33 @@ const parsePostalCodeAndAddress = function(s) {
   }
   return [ '', s ]
 }
+const convertURL = function(url) {
+  return 'data/' + url.replace(/[:\/\?\&\!\=\.]/g, "_")
+}
+const saveHTML = function(url, html) {
+  fs.writeFileSync(convertURL(url), html, "utf-8")
+}
+const SLEEP_BEFORE_FETCH = 3000
+const fetchHTML = async function(url) {
+  const fn = convertURL(url)
+  try {
+    const html = fs.readFileSync(fn)
+    console.log('use cache ', url)
+    return html
+  } catch (e) {
+    console.log('fetching... ', url)
+    await util.sleep(3000)
+    const html = await (await fetch(url)).text()
+    saveHTML(url, html)
+    return html
+  }
+}
 const fetchShop = async function(url) {
-  const html = await (await fetch(url)).text()
+  const html = await fetchHTML(url)
   const dom = cheerio.load(html)
   const item = parseTableItems(dom, dom('.ShopGaiyoBox table')[0])
   const pa = parsePostalCodeAndAddress(item['所在地'])
+  item['店舗名'] = dom(dom('#Stores-ShousaiBox h1')[0]).text().trim()
   item['郵便番号'] = pa[0]
   item['所在地'] = pa[1]
   item['定休日'] = util.toHalf(item['定休日'])
@@ -99,31 +121,34 @@ const test = async function() {
 }
 const scrape = async function() {
   const baseurl = 'http://www.genky.co.jp/shop/list.php'
-  const fn = 'genkey.csv'
+  const fn = 'genkey4.csv'
   const list = []
   A: for (let i = 1; i <= 4; i++) {
-    for (let j = 1;; j++) {
-      await util.sleep(3000)
+    for (let j = 0;; j++) {
       const url = baseurl + "?g=" + i + "&page=" + j
-      const html = await (await fetch(url)).text()
+      const html = await fetchHTML(url)
       const dom = cheerio.load(html)
       //console.log(html)
       const links = []
       dom('.ShopListBox a').each(async (idx, ele) => {
         const shopurl = 'http://www.genky.co.jp/shop/' + dom(ele).attr('href')
-        links.push(shopurl)
+        if (links.indexOf(shopurl) == -1) {
+          links.push(shopurl)
+        }
       })
       for (const link of links) {
         const item = await fetchShop(link)
         list.push(item)
         item.IDg = i
         item.cont_no = parseInt(link.match(/cont_no=(\d+)/)[1])
+        item.URL = link
       }
       util.writeCSVfromJSON(fn, list)
       if (links.length == 0)
         break
     }
   }
+  checkList(list)
 }
 const convert = async function() {
   const fn = 'genkey1.csv'
@@ -149,7 +174,51 @@ const convert = async function() {
   }
   util.writeCSVfromJSON(fndst, list)
 }
+const unique = ar => ar.filter((cur, idx, self) => self.indexOf(cur) == idx)
+
+const checkList = function(list2) {
+  console.log('店舗数', list2.length)
+  const pref = unique(list2.map(i => i['所在地'].substring(0, 3)))
+  //console.log(pref)
+  for (const p of pref) {
+    console.log(p, list2.reduce((acc, cur) => acc + (cur['所在地'].startsWith(p) ? 1 : 0), 0))
+  }
+}
+const convert2 = async function() {
+  const fn = 'genkey2.csv'
+  const fndst = 'genkey3.csv'
+  const list = util.readJSONfromCSV(fn)
+  console.log(list)
+  const list2 = []
+  for (const item of list) {
+    if (list2.some(x => x.cont_no == item.cont_no))
+      continue
+    item.URL = `http://www.genky.co.jp/shop/cont.php?cont_no=${item.cont_no}&g=${item.IDg}&ar=&page=0`
+    list2.push(item)
+  }
+  util.writeCSVfromJSON(fndst, list2)
+  checkList(list2)
+}
+const renames = function() {
+  for (const f of fs.readdirSync('data')) {
+    if (f.startsWith('data_')) {
+      const f2 = f.substring(5)
+      fs.writeFileSync('data/' + f2, fs.readFileSync('data/' + f, 'utf-8'))
+      fs.unlinkSync('data/' + f)
+      console.log(f)
+    }
+  }
+}
+const check = function() {
+  const list = util.readJSONfromCSV('genkey4.csv')
+  checkList(list)
+}
 const main = async function() {
   await scrape()
+  //check()
+
+  //saveHTML('http://www.genky.co.jp/shop/cont.php?cont_no=106&g=1&ar=&page=0', 'test')
+  //await convert2()
+
 }
 main()
