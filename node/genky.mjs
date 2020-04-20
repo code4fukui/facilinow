@@ -121,7 +121,7 @@ const test = async function() {
 }
 const scrape = async function() {
   const baseurl = 'http://www.genky.co.jp/shop/list.php'
-  const fn = 'genkey4.csv'
+  const fn = 'genky4.csv'
   const list = []
   A: for (let i = 1; i <= 4; i++) {
     for (let j = 0;; j++) {
@@ -151,8 +151,8 @@ const scrape = async function() {
   checkList(list)
 }
 const convert = async function() {
-  const fn = 'genkey1.csv'
-  const fndst = 'genkey2.csv'
+  const fn = 'genky1.csv'
+  const fndst = 'genky2.csv'
   const list = util.readJSONfromCSV(fn)
   console.log(list)
   for (const item of list) {
@@ -185,8 +185,8 @@ const checkList = function(list2) {
   }
 }
 const convert2 = async function() {
-  const fn = 'genkey2.csv'
-  const fndst = 'genkey3.csv'
+  const fn = 'genky2.csv'
+  const fndst = 'genky3.csv'
   const list = util.readJSONfromCSV(fn)
   console.log(list)
   const list2 = []
@@ -210,7 +210,7 @@ const renames = function() {
   }
 }
 const check = function() {
-  const list = util.readJSONfromCSV('genkey4.csv')
+  const list = util.readJSONfromCSV('genky4.csv')
   checkList(list)
 }
 const main = async function() {

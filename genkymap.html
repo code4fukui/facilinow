@@ -17,7 +17,7 @@ const main = async function() {
 		maxZoom: 18,
   }).addTo(map)
 
-  const data = await util.fetchCSVtoJSON('data/genkey.csv')
+  const data = await util.fetchCSVtoJSON('data/genky.csv')
 
   const pref = util.unique(data.map(i => i['所在地'].substring(0, 3)))
   let s = ''
@@ -126,7 +126,7 @@ a {
 
 <div id="link">
   <div id="src">
-    <div>DATA: <a href=http://www.genky.co.jp/shop/index.php>ドラッグストア ゲンキ― > 店舗・チラシ検索</a> を<a href=https://code4fukui.github.io/facilinow/data/genkey.csv>CSV</a>に加工</div>
+    <div>DATA: <a href=http://www.genky.co.jp/shop/index.php>ドラッグストア ゲンキ― > 店舗・チラシ検索</a> を<a href=https://code4fukui.github.io/facilinow/data/genky.csv>CSV</a>に加工</div>
     <div>APP：CC BY <a href='https://fukuno.jig.jp/'>fukuno.jig.jp</a> (<a href=https://github.com/code4fukui/facilinow/>src on GitHub</a>)</div>
   </div>
   <img id=qrcode><script>addEventListener("load", () => qrcode.src = "https://chart.apis.google.com/chart?chs=140x140&cht=qr&chl=" + encodeURIComponent(document.location))</script><br>
