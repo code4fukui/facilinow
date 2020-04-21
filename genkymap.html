@@ -4,10 +4,10 @@
 <meta property="og:image" content="facilinow.png"/>
 <meta name="format-detection" content="telephone=no"/>
 <title>ゲンキーマップ</title>
-<link rel='stylesheet' href='leaflet/leaflet.css'/>
+<link rel='stylesheet' href='https://code4sabae.github.io/leaflet-mjs/leaflet.css'/>
 <script type='module'>
 
-import L from './leaflet/leaflet-module.mjs'
+import L from 'https://code4sabae.github.io/leaflet-mjs/leaflet.mjs'
 import util from './util.mjs'
 
 const main = async function() {
@@ -127,6 +127,7 @@ a {
 <div id="link">
   <div id="src">
     <div>DATA: <a href=http://www.genky.co.jp/shop/index.php>ドラッグストア ゲンキ― > 店舗・チラシ検索</a> を<a href=https://code4fukui.github.io/facilinow/data/genky.csv>CSV</a>に加工</div>
+    <div>LIB：CC BY <a href='https://leafletjs.com/'>Leaflet</a> (<a href=https://github.com/Leaflet/Leaflet>src on GitHub</a>)</div>
     <div>APP：CC BY <a href='https://fukuno.jig.jp/'>fukuno.jig.jp</a> (<a href=https://github.com/code4fukui/facilinow/>src on GitHub</a>)</div>
   </div>
   <img id=qrcode><script>addEventListener("load", () => qrcode.src = "https://chart.apis.google.com/chart?chs=140x140&cht=qr&chl=" + encodeURIComponent(document.location))</script><br>
