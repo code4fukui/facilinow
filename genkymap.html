@@ -8,7 +8,7 @@
 <script type='module'>
 
 import L from 'https://code4sabae.github.io/leaflet-mjs/leaflet.mjs'
-import util from './util.mjs'
+import util from 'https://taisukef.github.io/util/util.mjs'
 
 const main = async function() {
   const map = L.map('mapid')
@@ -30,6 +30,7 @@ const main = async function() {
     l.innerHTML = `<input type=checkbox ${checked} id=chk${i} value="${p}"">${p} ${n}店舗 `
     checks.appendChild(l)
     const chk = l.children[0]
+    chk.pref = p
     chks[p] = chk
   }
 
@@ -62,8 +63,67 @@ const main = async function() {
   for (const c in chks) {
     chks[c].onclick = show
   }
+
+  await showTabularMap(pref, data, map, chks)
 }
 window.onload = main
+
+const showTabularMap = async function(prefs, data, map, chks) {
+  const area = await util.fetchCSVtoJSON('https://tabularmaps.github.io/areamap/tabularmaps_japan.csv')
+	const cities = await util.fetchCSVtoJSON('https://code4fukui.github.io/localgovjp/localgovjp-utf8.csv')
+  console.log(cities)
+  for (let i = 0; i < prefs.length; i++) {
+    const pref = prefs[i]
+    const div = util.cr('div')
+    div.pref = pref
+    tmapc.appendChild(div)
+    
+    const chk = chks[pref]
+    div.style.display = chk.checked ? 'block' : 'none'
+    chk.addEventListener('change', function() {
+      div.style.display = this.checked ? 'block' : 'none'
+    })
+
+    const h2 = util.cr('h2')
+    h2.textContent = pref
+    div.appendChild(h2)
+
+    const a = area.reduce((pre, cur) => pre = cur.name_ja == pref ? cur : pre)
+    const tmap = util.makeGrids(a.tabularmap)
+    div.appendChild(tmap)
+
+    let max = 0
+    for (const c of tmap.children) {
+      const city = c.textContent
+      if (city == '-')
+        continue
+      let cnt = 0
+      for (const d of data) {
+        if (d['所在地'].indexOf(city) >= 0) {
+          cnt++
+        }
+      }
+      if (cnt > max)
+        max = cnt
+      c.textContent += `(${cnt})`
+      c.cnt = cnt
+      c.data = cities.reduce((pre, cur) => pre = cur.pref == pref && cur.city == city ? cur : pre)
+      c.onclick = function() {
+        const d = this.data
+        if (d) {
+          map.setView([ d.lat, d.lng ], 13)
+        }
+      }
+    }
+    for (const c of tmap.children) {
+      if (c.textContent == '-')
+        continue
+      const h = 180
+      const v = c.cnt == 0 ? 100 : 50 + ((max - c.cnt) / max) * 49
+      c.style.backgroundColor = `hsl(${h},50%,${v}%)`
+    }
+  }
+}
 
 </script>
 <style>
@@ -79,11 +139,11 @@ h1 {
 	padding: .0em;
 	background-color: var(--main-color);
 	color: white;
-	font-size: 8vw;
+	font-size: 5vw;
 	text-align: center;
 }
 h2 {
-  font-size: 3vw;
+  font-size: 2vw;
 }
 .subtitle {
 	text-align: center;
@@ -96,12 +156,22 @@ h2 {
 /* main */
 #mapid {
   width: 100%;
-  height: 60vh;
+  height: 50vh;
 }
-.leaflet-tile-container { /* 地図の色味変更 CSS3 filter */
-    x-filter: sepia(100%) brightness(95%); /* セピア */
-    x-filter: grayscale(100%) brightness(110%); /* 明るめグレースケール */
-    filter: hue-rotate(-10deg) saturate(70%) brightness(104%); /* いい感じの色？ */
+/* tabular maps */
+#tmapc h2 {
+  margin: .2vh;
+  padding: 0;
+}
+#tmapc span {
+	display: flex;
+	font-size: 1.5vmax;
+	align-items: center;
+	justify-content: center;
+	border-radius: .5vmax;
+	border: .1vmax solid #333;
+	padding: .2vmax .2vmax;
+	margin: .2vmax;
 }
 /* footer */
 #debug {
@@ -123,6 +193,7 @@ a {
 <h1 id=title>ゲンキーマップ</h1><div class=subtitle>ドラッグストア「ゲンキー」店舗をマップ表示</div>
 <div id='checks'></div>
 <div id="mapid"></div>
+<div id='tmapc'></div>
 
 <div id="link">
   <div id="src">

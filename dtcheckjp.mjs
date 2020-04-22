@@ -1,4 +1,4 @@
-import util from './util.mjs'
+import util from 'https://taisukef.github.io/util/util.mjs'
 
 const fetchHoliday = async function() {
   const url_holiday = 'data/holiday_jp.csv'
