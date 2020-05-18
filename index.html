@@ -9,17 +9,63 @@
 import dtcheckjp from './dtcheckjp.mjs'
 import util from 'https://taisukef.github.io/util/util.mjs'
 
-const main = async function() {
-  const url = 'data/fukui.csv'
-  const data = await util.fetchCSVtoJSON(url)
-  //console.log(data)
+const DATA_FUKUI = [
+  'https://push.sabae.cc/?id=12',
+  'https://push.sabae.cc/?id=13',
+  'https://push.sabae.cc/?id=21',
+  'https://push.sabae.cc/?id=22',
+  'https://push.sabae.cc/?id=24',
+  'https://push.sabae.cc/?id=25',
+  'https://push.sabae.cc/?id=26',
+  'https://push.sabae.cc/?id=27',
+  'https://push.sabae.cc/?id=29',
+  'https://push.sabae.cc/?id=30',
+  'https://push.sabae.cc/?id=31',
+  'https://push.sabae.cc/?id=32',
+  'https://push.sabae.cc/?id=33',
+  'https://push.sabae.cc/?id=34',
+  'https://push.sabae.cc/?id=35',
+  'https://push.sabae.cc/?id=36',
+  'https://push.sabae.cc/?id=37',
+  'https://push.sabae.cc/?id=39',
+]
 
+const main = async function() {
   const dtchecker = await (new dtcheckjp.DateTimeCheckerJP()).init()
+
+  // test
+  /*
+  //const rest = '令和2年5月27日(水)から6月2日(火)まで燻蒸のため休館します。'
+  const rest = '5/27〜'
+  console.log(dtchecker.checkDays(rest))
+  return
+  */
+
+  // const url = 'data/fukui2.csv'
+  // const data = await util.fetchCSVtoJSON(url)
+  // const list = [3, 1]
+  // const baseurl = 'http://localhost:8006/'
+  
+  /*
+  const data = []
+  for (const url of DATA_FUKUI) {
+    data.push(await (await fetch(url)).json())
+  }
+  console.log(data)
+  */
+  const ids = DATA_FUKUI.map(url => url.substring(url.lastIndexOf('=') + 1)).join(',')
+  const url = 'https://push.sabae.cc/' + ids + '.csv'
+  console.log(url)
+  opendata.href = url
+  const data = await util.fetchCSVtoJSON(url)
+  // const data = await (await fetch(url)).text()
+  console.log(data)
 
   const cr = tag => document.createElement(tag)
   const s = []
   const tbl = cr('table')
-  const head = [ '開館状況', '混雑状況', '施設名', '休館日', '年末年始', '臨時休館日', '開館時間' ]
+  // const head = [ '開館状況', '混雑状況', '施設名', '開館時間', '休館日', '臨時開館日', '臨時休館日', '備考'] // '平日開館時間', '休日開館時間', , '年末年始'
+  const head = [ '開館状況', '混雑状況', '施設名', '開館時間', '備考'] // '平日開館時間', '休日開館時間', , '年末年始'
   const tr = cr('tr')
   for (const h of head) {
     const th = cr('th')
@@ -27,6 +73,22 @@ const main = async function() {
     tr.appendChild(th)
   }
   tbl.appendChild(tr)
+
+  const checkOpening = function (d) {
+    const restDays = [ d['休館日'], d['臨時休館日'] ]
+    if (d['臨時休館日'].indexOf('年末年始') >= 0 || d['臨時休館日'].indexOf('年末・年始') >= 0) {
+      restDays.push(d['年末年始'])
+    }
+    const n = !dtchecker.checkDate(restDays, now) && dtchecker.checkTime(d['平日開館時間'], now)
+    return n
+  }
+  const setStatus = function (td, d) {
+    const n = checkOpening(d)
+    td.textContent = n ? d['混雑状況'] : '-'
+    // console.log(n, d['混雑状況'], d['施設名'], td.textContent)
+    td.style.backgroundColor = !n ? '#ccc' : (d['混雑状況'].indexOf('規制') >= 0 ? '#f88' : (d['混雑状況'].indexOf('いない') >= 0 ? '#aaf' : '#ccc'))
+  }
+
   const now = new Date()
   for (const d of data) {
     const tr = cr('tr')
@@ -34,47 +96,68 @@ const main = async function() {
     let td = cr('td')
     //const n = util.rnd(2)
     //console.log(d.施設名)
-    const n = !dtchecker.checkDate([ d['休館日'], d['年末年始'], d['臨時休館日'] ], now) && dtchecker.checkTime(d['開館時間'], now)
+    const n = checkOpening(d)
     td.setOpening = function(n) {
-      this.textContent = n ? '開館中' : '閉館中'
-      this.style.backgroundColor = n ? '#f88' : '#ccc'
+      this.textContent = n ? '開館' : '閉館'
+      this.style.backgroundColor = n ? '#ff8' : '#ccc'
     }
     td.setOpening(n)
     d.opening = td
     tr.appendChild(td)
 
     td = cr('td')
-    const flg = d['混雑状況'] == 1
-    td.textContent = n ? (flg ? '混雑' : '空き') : "-"
-    td.style.backgroundColor = flg ? '#f88' : '#ccc'
+    // const flg = d['混雑状況'] == 1
+    // td.textContent = n ? (flg ? '混雑' : '空き') : "-"
+    // td.style.backgroundColor = flg ? '#f88' : '#ccc'
+    setStatus(td, d)
     tr.appendChild(td)
     d.status = td
 
     for (let i = 2; i < head.length; i++) {
       const name = head[i]
       td = cr('td')
-      td.textContent = d[name]
+      if (name === '開館時間') {
+        const open1 = d['平日開館時間']
+        const open2 = d['休日開館時間']
+        if (open1 === open2) {
+          td.innerHTML = open1
+        } else {
+          td.innerHTML = '平日: ' + open1 + '<br>休日: ' + open2
+        }
+      } else if (name === '施設名' && d.URL) {
+        td.innerHTML = `<a href=${d.URL}>${d[name]}</a>`
+      } else {
+        td.innerHTML = d[name] ? d[name] : ''
+      }
       tr.appendChild(td)
     }
     tbl.appendChild(tr)
   }
   mainc.appendChild(tbl)
 
-  seldt.value = util.formatYMDHMS(new Date())
-  const show = function(now) {
-    console.log(now)
-    for (const d of data) {
-      const n = !dtchecker.checkDate([ d['休館日'], d['年末年始'], d['臨時休館日'] ], now) && dtchecker.checkTime(d['開館時間'], now)
-      //console.log(n)
-      d.opening.setOpening(n)
-      d.status.textContent = '-'
-      d.status.style.backgroundColor = '#ccc'
+  /*
+①　「臨時休館日」が「＊」　⇒　『臨時休館』
+②　「臨時休館日」に該当　⇒　『臨時休館』
+③　「休館日」に該当　⇒　『休館』
+④　「開館時間」に該当　⇒　『開館』
+⑤　以外　⇒　『閉館』
+  */
+  if (window.seldt) {
+    seldt.value = util.formatYMDHMS(new Date())
+    const show = function(now) {
+      // console.log(now)
+      for (const d of data) {
+        const n = checkOpening(d)
+        d.opening.setOpening(n)
+        setStatus(d.status, d)
+      }
+    }
+    show(now)
+    seldt.onchange = function() {
+      show(new Date(seldt.value))
     }
   }
-  show(now)
-  seldt.onchange = function() {
-    show(new Date(seldt.value))
-  }
+  setInterval(() => { window.location.reload() }, 5 * 60 * 1000)
 }
 window.onload = main
 
@@ -108,7 +191,7 @@ h2 {
 	font-size: 3vw;
 }
 #mainc {
-  font-size: 1.5vw;
+  x-font-size: 1.5vw;
   text-align: left;
   margin: 1vw;
   text-align: center;
@@ -148,12 +231,13 @@ a {
 
 <h1 id=title>施設状況</h1><div class=subtitle>福井県施設ダッシュボード</div>
 <div id="mainc"></div>
-<input id='seldt' type='datetime-local'>
+
+<!--<input id='seldt' type='datetime-local'>-->
 
 <div id="link">
 
 <div id="src">
-<div>DATA: CC BY 福井県庁 <a href=data/fukui.csv>福井県施設CSVオープンデータ</a> / CC BY 日本政府 <a href=data/holiday_jp.csv>国民の祝日CSVオープンデータ</a></div>
+<div>DATA: CC BY 福井県庁 <a id='opendata' href=data/fukui.csv>福井県施設CSVオープンデータ</a> / CC BY 日本政府 <a href=data/holiday_jp.csv>国民の祝日CSVオープンデータ</a></div>
 <div>APP：CC BY <a href='https://fukuno.jig.jp/'>fukuno.jig.jp</a> (<a href=https://github.com/code4fukui/facilinow/>src on GitHub</a>)</div>
 </div>
 <img id=qrcode><script>addEventListener("load", () => qrcode.src = "https://chart.apis.google.com/chart?chs=140x140&cht=qr&chl=" + encodeURIComponent(document.location))</script><br>

@@ -26,6 +26,12 @@ const parseMinutesJP = function (s) {
     const h = parseInt(num[1])
     return h * 60
   }
+  num = s.match(/(\d+):(\d+)/)
+  if (num) {
+    const h = parseInt(num[1])
+    const m = parseInt(num[2])
+    return h * 60 + m
+  }
   console.log('error parseMinutesJP ' + s)
   return 0
 }
@@ -37,7 +43,6 @@ const getMinutesNow = function (t) {
   // return 18 * 60 + 0
 }
 const checkTimeDuration = function (duration, nowt) {
-  console.log(duration)
   const s = util.splitString(duration, '〜～')
   const st = parseMinutesJP(s[0])
   const ed = parseMinutesJP(s[1])
@@ -63,6 +68,13 @@ const parseDaysJP = function (s) {
     const d = parseInt(num[2])
     return m * 100 + d
   }
+  num = s.match(/令和(\d+)年(\d+)月(\d+)日(\(.\))/) // 注意、年、曜日無視！
+  if (num) {
+    const y = 2018 + parseInt(num[1])
+    const m = parseInt(num[2])
+    const d = parseInt(num[3])
+    return m * 100 + d
+  }
   console.log('error parseDaysJP ', s)
   // throw 'error ' + s
   return null
@@ -77,6 +89,13 @@ const getDaysNow = function (t) {
   // return 428
   // return 408
 }
+
+/*
+const rest = '月曜(ただし祝日は除く)'
+const m = rest.match(/^(毎週)?([日月火水木金土])曜日?(\((ただし)?祝日は除く\))$/)
+console.log(m)
+*/
+
 const checkDaysWithHoliday = function (holiday, rest, nowt) {
   if (!nowt) { nowt = new Date() }
   if (Array.isArray(rest)) {
@@ -91,7 +110,7 @@ const checkDaysWithHoliday = function (holiday, rest, nowt) {
   if (!rest || rest.length === 0) { return false }
 
   const now = getDaysNow(nowt)
-  rest = util.toHalf(rest)
+  rest = util.toHalf(rest).trim()
   const d = new Date()
   d.setMonth(Math.floor(now / 100) - 1)
   d.setDate(now % 100)
@@ -104,16 +123,51 @@ const checkDaysWithHoliday = function (holiday, rest, nowt) {
   if (week >= 0 && rest.length === 1) {
     return week === day
   }
-  let m = rest.match(/^(毎週)?([日月火水木金土])曜日?(\(祝日の場合はその翌日\))?$/)
+  let m = rest.match(/^(毎週)?([日月火水木金土])曜日?(\(祝日の場合はその翌日\))?(\(火曜日が休日の場合は翌日休館 \))?$/)
   if (m) {
+    if (m[3] || m[4]) { // 翌日休館パターン
+      // 次の曜日かチェック
+      const week = WEEKS.indexOf((m[2] + 1) % 7)
+      // console.log('week', week, m[2], day, now)
+      if (week !== day) { return false }
+      // 前日が祝日だったかチェック
+      const ymdyesterday = util.formatYMD(new Date(d.getTime() - 24 * 60 * 60 * 1000))
+      return holiday.find(h => h.date === ymdyesterday)
+    }
     const week = WEEKS.indexOf(m[2])
     // console.log('week', week, m[2], day, now)
-    console.log(m[3])
+    return week === day
+  }
+  m = rest.match(/^(毎週)?([日月火水木金土])曜日?(\((ただし)?[祝休]日[はを]除く\))$/)
+  if (m) {
+    if (holiday.find(h => h.date === ymd)) { return false }
+    const week = WEEKS.indexOf(m[2])
     return week === day
   }
   const NUMS = '一二三四五12345'
-  m = rest.match(/^第([一二三四五12345])・?第([一二三四五12345])([日月火水木金土])曜日?$/)
+  m = rest.match(/^第([一二三四五12345])・?第?([一二三四五12345])([日月火水木金土])曜日?(\(祝日の場合は翌日\))?$/)
   if (m) {
+    if (m[4]) {
+      // 前日が該当する曜日かチェック
+      const dyesterday = new Date(d.getTime() - 24 * 60 * 60 * 1000)
+      const dayyesterday = dyesterday.getDay()
+      const ymdyesterday = util.formatYMD(dyesterday)
+      const week = WEEKS.indexOf(m[3])
+      if (week === dayyesterday) {
+        for (let i = 1; i <= 2; i++) {
+          const nth = NUMS.indexOf(m[i]) % 5
+          const date = dyesterday.getDate()
+          // console.log(nth, date)
+          if (Math.floor(date / 7) === nth) {
+            // 前日が祝日ならtrue
+            if (holiday.find(h => h.date === ymdyesterday)) {
+              return true
+            }
+          }
+        }
+      }
+      // そうで無いなら通常チェック
+    }
     const week = WEEKS.indexOf(m[3])
     if (week !== day) { return false }
     for (let i = 1; i <= 2; i++) {
@@ -135,8 +189,7 @@ const checkDaysWithHoliday = function (holiday, rest, nowt) {
   }
   if (rest === '祝日') {
     for (const h of holiday) {
-      if (h.date === ymd)
-        return true
+      if (h.date === ymd) { return true }
     }
     return false
   }
@@ -157,7 +210,7 @@ const checkDaysWithHoliday = function (holiday, rest, nowt) {
     }
     return false
   }
-  if (rest === '休日の翌日' || rest === '休日の翌日(土・日・祝祭日除く)') {
+  if (rest === '休日の翌日' || rest === '休日の翌日(土・日・祝祭日除く)' || rest === '休日の翌日(土曜・日曜・休日を除く)') {
     // まずその日が休日の場合は除く
     if (day === 0 || day === 6) { // 土日
       return false
@@ -177,41 +230,47 @@ const checkDaysWithHoliday = function (holiday, rest, nowt) {
     }
     return false
   }
-  if (rest === '臨時休館日' || rest === '当館指定日') {
+  if (rest === '臨時休館日' || rest === '当館指定日' || rest === '年末年始' || rest === '年末・年始') {
     return false
   }
-  if (rest.indexOf('〜') >= 0) {
-    return checkDays(rest, nowt)
-  }
-  const pd = parseDaysJP(rest)
-  if (pd != null) {
-    return pd === now
-  }
-  console.log('error ', rest)
-  // throw rest
-  return false
+  return checkDays(rest, nowt)
 }
-const checkDays = function(during, nowt) {
-  if (!nowt)
-    nowt = new Date()
+const checkDays = function (during, nowt) {
+  if (!nowt) { nowt = new Date() }
   const now = getDaysNow(nowt)
-  const n = during.indexOf('〜')
+
+  // nからmまで
+  let n = during.indexOf('から')
+  if (n >= 0) {
+    let m = during.indexOf('まで')
+    m = m < 0 ? during.length : m
+    const st = parseDaysJP(during.substring(0, n))
+    const ed = parseDaysJP(during.substring(n + 2, m))
+    if (st > ed) {
+      return now >= st || now <= ed
+    }
+    return now >= st && now <= ed
+  }
+  // n/m〜n/m
+  n = during.indexOf('〜')
   if (n < 0) {
-    return parseDaysJP(during) == now
+    return parseDaysJP(during) === now
   }
   const s = during.split('〜')
   const st = parseDaysJP(s[0])
-  const ed = parseDaysJP(s[1])
+  const ed = s[1].length === 0 ? 1231 : parseDaysJP(s[1]) // 終了日付なしは 12/31 とする
+  // console.log(st, ed)
   if (st > ed) {
     return now >= st || now <= ed
   }
   return now >= st && now <= ed
 }
 class DateTimeChecker {
-  checkTime(now, time) {
+  checkTime (now, time) {
     return false
   }
-  checkDate(now, date) {
+
+  checkDate (now, date) {
     return false
   }
 }
@@ -228,6 +287,34 @@ class DateTimeCheckerJP extends DateTimeChecker {
   checkDate (date, now) {
     return checkDaysWithHoliday(this.holiday, date, now)
   }
+
+  checkDays (during, now) {
+    return checkDays(during, now)
+  }
+
+  checkRestDay (nowt) {
+    if (!nowt) { nowt = new Date() }
+    if (this.checkHoliday(nowt)) { return true }
+    const now = getDaysNow(nowt)
+    const d = new Date()
+    d.setMonth(Math.floor(now / 100) - 1)
+    d.setDate(now % 100)
+    const day = d.getDay()
+    return day >= 1 && day <= 5
+  }
+
+  checkHoliday (nowt) {
+    if (!nowt) { nowt = new Date() }
+    const now = getDaysNow(nowt)
+    const d = new Date()
+    d.setMonth(Math.floor(now / 100) - 1)
+    d.setDate(now % 100)
+    const ymd = util.formatYMD(d)
+    for (const h of this.holiday) {
+      if (h.date === ymd) { return true }
+    }
+    return false
+  }
 }
 class DateTimeCheckerJPlocal extends DateTimeCheckerJP {
   async init () {
@@ -239,7 +326,7 @@ class DateTimeCheckerJPlocal extends DateTimeCheckerJP {
 
 export default { DateTimeCheckerJP }
 
-const main = async function() {
+const main = async function () {
   const fs = await import('fs')
   const fn = 'data/fukui.csv'
   const data = util.csv2json(util.decodeCSV(util.removeBOM(fs.readFileSync(fn, 'utf-8'))))
