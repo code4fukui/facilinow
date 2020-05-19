@@ -236,6 +236,7 @@ const checkDaysWithHoliday = function (holiday, rest, nowt) {
   return checkDays(rest, nowt)
 }
 const checkDays = function (during, nowt) {
+  during = during.replace(/～/g, '〜')
   if (!nowt) { nowt = new Date() }
   const now = getDaysNow(nowt)
 
@@ -259,7 +260,7 @@ const checkDays = function (during, nowt) {
   const s = during.split('〜')
   const st = parseDaysJP(s[0])
   const ed = s[1].length === 0 ? 1231 : parseDaysJP(s[1]) // 終了日付なしは 12/31 とする
-  // console.log(st, ed)
+  console.log(st, ed, now)
   if (st > ed) {
     return now >= st || now <= ed
   }
