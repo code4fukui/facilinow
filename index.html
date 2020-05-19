@@ -37,11 +37,12 @@ const main = async function() {
   
   //const rest = '令和2年5月27日(水)から6月2日(火)まで燻蒸のため休館します。'
   // const rest = '5/27〜'
+  /*
   const rest = '2月29日～'
   
   console.log(dtchecker.checkDays(rest))
   //return
-  
+  */
 
   // const url = 'data/fukui2.csv'
   // const data = await util.fetchCSVtoJSON(url)
@@ -66,8 +67,8 @@ const main = async function() {
   const cr = tag => document.createElement(tag)
   const s = []
   const tbl = cr('table')
-   const head = [ '開館状況', '混雑状況', '施設名', '開館時間', '休館日', '臨時開館日', '臨時休館日', '備考'] // '平日開館時間', '休日開館時間', , '年末年始'
-  //const head = [ '開館状況', '混雑状況', '施設名', '開館時間', '備考'] // '平日開館時間', '休日開館時間', , '年末年始'
+  // const head = [ '開館状況', '混雑状況', '施設名', '開館時間', '休館日', '臨時開館日', '臨時休館日', '備考'] // '平日開館時間', '休日開館時間', , '年末年始'
+  const head = [ '開館状況', '混雑状況', '施設名', '開館時間', '備考'] // '平日開館時間', '休日開館時間', , '年末年始'
   const tr = cr('tr')
   for (const h of head) {
     const th = cr('th')
