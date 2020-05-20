@@ -210,6 +210,11 @@ td, #mainc th {
   text-align: left;
   padding: .1vw .6vw;
 }
+@media screen and (min-aspect-ratio: 3/4) { /* for smartphone */
+  td:nth-child(4) {
+    white-space: nowrap;
+  }
+}
 #seldt {
   font-family: sans-serif;
   font-size: 2vw;
