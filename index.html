@@ -9,28 +9,6 @@
 import dtcheckjp from './dtcheckjp.mjs'
 import util from 'https://taisukef.github.io/util/util.mjs'
 
-const DATA_FUKUI = [
-  'https://push.sabae.cc/?id=12',
-  'https://push.sabae.cc/?id=13',
-  'https://push.sabae.cc/?id=21',
-  'https://push.sabae.cc/?id=22',
-  'https://push.sabae.cc/?id=24',
-  'https://push.sabae.cc/?id=25',
-  'https://push.sabae.cc/?id=26',
-  'https://push.sabae.cc/?id=27',
-  'https://push.sabae.cc/?id=29',
-  'https://push.sabae.cc/?id=30',
-  'https://push.sabae.cc/?id=31',
-  'https://push.sabae.cc/?id=32',
-  'https://push.sabae.cc/?id=33',
-  'https://push.sabae.cc/?id=34',
-  'https://push.sabae.cc/?id=35',
-  'https://push.sabae.cc/?id=36',
-  'https://push.sabae.cc/?id=37',
-  'https://push.sabae.cc/?id=39',
-  'https://push.sabae.cc/?id=296',
-]
-
 const main = async function() {
   const dtchecker = await (new dtcheckjp.DateTimeCheckerJP()).init()
 
@@ -57,8 +35,7 @@ const main = async function() {
   }
   console.log(data)
   */
-  const ids = DATA_FUKUI.map(url => url.substring(url.lastIndexOf('=') + 1)).join(',')
-  const url = 'https://push.sabae.cc/' + ids + '.csv'
+  const url = 'https://push.sabae.cc/319.csv'
   console.log(url)
   opendata.href = url
   const data = await util.fetchCSVtoJSON(url)
