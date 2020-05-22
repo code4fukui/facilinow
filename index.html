@@ -75,8 +75,6 @@ const main = async function() {
     const tr = cr('tr')
 
     let td = cr('td')
-    //const n = util.rnd(2)
-    //console.log(d.施設名)
     const n = checkOpening(d)
     td.setOpening = function(n) {
       this.textContent = n ? '開館' : '閉館'
@@ -87,9 +85,6 @@ const main = async function() {
     tr.appendChild(td)
 
     td = cr('td')
-    // const flg = d['混雑状況'] == 1
-    // td.textContent = n ? (flg ? '混雑' : '空き') : "-"
-    // td.style.backgroundColor = flg ? '#f88' : '#ccc'
     setStatus(td, d)
     tr.appendChild(td)
     d.status = td
@@ -100,11 +95,11 @@ const main = async function() {
       if (name === '開館時間') {
         const open1 = d['平日開館時間']
         const open2 = d['休日開館時間']
-        if (open1 === open2) {
-          td.innerHTML = open1
-        } else {
-          td.innerHTML = '平日: ' + open1 + '<br>休日: ' + open2
+        let open = open1
+        if (open1 !== open2) {
+          open = '平日: ' + open1 + '<br>休日: ' + open2
         }
+        td.innerHTML = `<a href="https://push.sabae.cc/${d.id}">${open}</a>`
       } else if (name === '施設名' && d.URL) {
         td.innerHTML = `<a href=${d.URL}>${d[name]}</a>`
       } else {
@@ -209,7 +204,7 @@ td, #mainc th {
   margin-left: 1em;
 }
 a {
-	color: gray !important;
+	color: #333 !important;
 }
 </style>
 </head>
