@@ -43,11 +43,17 @@ const getMinutesNow = function (t) {
   // return 18 * 60 + 0
 }
 const checkTimeDuration = function (duration, nowt) {
-  const s = util.splitString(duration, '〜～')
-  const st = parseMinutesJP(s[0])
-  const ed = parseMinutesJP(s[1])
-  const now = getMinutesNow(nowt)
-  return now >= st && now <= ed
+  const s = util.splitString(duration, '〜～~-ー')
+  if (s.length === 1) {
+    return now === parseMinutesJP(s[0])
+  }
+  if (s.length === 2) {
+    const st = parseMinutesJP(s[0])
+    const ed = parseMinutesJP(s[1])
+    const now = getMinutesNow(nowt)
+    return now >= st && now <= ed
+  }
+  return false
 }
 /*
 console.log(parseMinutesJP('午前９時30分'))
