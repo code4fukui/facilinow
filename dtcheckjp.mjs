@@ -1,11 +1,5 @@
 import util from 'https://taisukef.github.io/util/util.mjs'
-
-const fetchHoliday = async function () {
-  const urlHoliday = 'data/holiday_jp.csv'
-  const holiday = await util.fetchCSVtoJSON(urlHoliday)
-  // console.log(holiday)
-  return holiday
-}
+import { getHolidays } from "https://code4fukui.github.io/day-es/Holiday.js";
 
 const parseMinutesJP = function (s) {
   if (!s) { throw new Error('dt is null') }
@@ -283,7 +277,8 @@ class DateTimeChecker {
 }
 class DateTimeCheckerJP extends DateTimeChecker {
   async init () {
-    this.holiday = await fetchHoliday()
+    this.holiday = getHolidays();
+    console.log(this.holiday);
     return this
   }
 
