@@ -4,12 +4,96 @@
 <meta property="og:image" content="facilinow.png"/>
 <meta name="format-detection" content="telephone=no"/>
 <title>福井県施設ダッシュボード</title>
-<script type='module'>
+<style>
+body {
+	font-family: sans-serif;
+	margin: 0;
+  word-wrap: break-word;
+  --main-color: rgb(78, 145, 66);
+  text-align: center;
+}
+h1 {
+	margin: 0;
+	padding: .0em;
+	background-color: var(--main-color);
+	color: white;
+	font-size: 8vw;
+	text-align: center;
+}
+h2 {
+  font-size: 3vw;
+}
+.subtitle {
+	text-align: center;
+	margin: 0;
+	padding: .3em;
+	background-color: var(--main-color);
+	color: white;
+	font-size: 3vw;
+}
+#mainc {
+  x-font-size: 1.5vw;
+  text-align: left;
+  margin: 1vw;
+  text-align: center;
+}
+#mainc table {
+  border-collapse: collapse;
+  border: 2px solid #aaa;
+  display: inline-block;
+}
+td, #mainc th {
+  border: 2px solid #aaa;
+  text-align: left;
+  padding: .1vw .6vw;
+}
+@media screen and (min-aspect-ratio: 3/4) { /* for smartphone */
+  td:nth-child(4) {
+    white-space: nowrap;
+  }
+}
+#seldt {
+  font-family: sans-serif;
+  font-size: 2vw;
+}
+#debug {
+  border: 1px solid black;
+  margin: 1em;
+  padding: 0.5em;
+  font-size: 70%;
+}
+#src {
+	margin: 1.5em 0 .5em 0;
+}
+#materials a {
+  margin-left: 1em;
+}
+a {
+	color: #333 !important;
+}
+</style>
+</head>
+<body>
 
+<h1 id=title>施設状況</h1><div class=subtitle>福井県施設ダッシュボード</div>
+<div id="mainc"></div>
+
+<!--<input id='seldt' type='datetime-local'>-->
+
+<div id="link">
+
+<div id="src">
+<div>DATA: CC BY <a href=https://www.pref.fukui.lg.jp/doc/toukei-jouhou/facilinow.html>福井県庁統計情報課</a> <a id='opendata' href=data/fukui.csv>福井県施設CSVオープンデータ</a><br>
+<div>DATA: CC BY 内閣府 <a href=https://www8.cao.go.jp/chosei/shukujitsu/gaiyou.html>国民の祝日について - 内閣府</a> → <a href=https://github.com/code4fukui/day-es>Holiday.js</a></div>
+<div>APP：CC BY <a href='https://fukuno.jig.jp/2855'>fukuno.jig.jp</a> (<a href=https://github.com/code4fukui/facilinow/>src on GitHub</a>)</div>
+</div>
+
+<script type='module'>
 import dtcheckjp from './dtcheckjp.mjs'
 import util from 'https://taisukef.github.io/util/util.mjs'
+import "https://taisukef.github.io/qrcode-generator/es/qr-code.js";
 
-const main = async function() {
+const main = async () => {
   const dtchecker = await (new dtcheckjp.DateTimeCheckerJP()).init()
 
   // test
@@ -134,98 +218,15 @@ const main = async function() {
     }
   }
   setInterval(() => { window.location.reload() }, 5 * 60 * 1000)
-}
-window.onload = main
-
+};
+main();
 
 </script>
-<style>
-body {
-	font-family: sans-serif;
-	margin: 0;
-  word-wrap: break-word;
-  --main-color: rgb(78, 145, 66);
-  text-align: center;
-}
-h1 {
-	margin: 0;
-	padding: .0em;
-	background-color: var(--main-color);
-	color: white;
-	font-size: 8vw;
-	text-align: center;
-}
-h2 {
-  font-size: 3vw;
-}
-.subtitle {
-	text-align: center;
-	margin: 0;
-	padding: .3em;
-	background-color: var(--main-color);
-	color: white;
-	font-size: 3vw;
-}
-#mainc {
-  x-font-size: 1.5vw;
-  text-align: left;
-  margin: 1vw;
-  text-align: center;
-}
-#mainc table {
-  border-collapse: collapse;
-  border: 2px solid #aaa;
-  display: inline-block;
-}
-td, #mainc th {
-  border: 2px solid #aaa;
-  text-align: left;
-  padding: .1vw .6vw;
-}
-@media screen and (min-aspect-ratio: 3/4) { /* for smartphone */
-  td:nth-child(4) {
-    white-space: nowrap;
-  }
-}
-#seldt {
-  font-family: sans-serif;
-  font-size: 2vw;
-}
-#debug {
-  border: 1px solid black;
-  margin: 1em;
-  padding: 0.5em;
-  font-size: 70%;
-}
-#src {
-	margin: 1.5em 0 .5em 0;
-}
-#materials a {
-  margin-left: 1em;
-}
-a {
-	color: #333 !important;
-}
-</style>
-</head>
-<body>
 
-<h1 id=title>施設状況</h1><div class=subtitle>福井県施設ダッシュボード</div>
-<div id="mainc"></div>
-
-<!--<input id='seldt' type='datetime-local'>-->
-
-<div id="link">
-
-<div id="src">
-<div>DATA: CC BY <a href=https://www.pref.fukui.lg.jp/doc/toukei-jouhou/facilinow.html>福井県庁統計情報課</a> <a id='opendata' href=data/fukui.csv>福井県施設CSVオープンデータ</a><br>
-<div>DATA: CC BY 内閣府 <a href=https://www8.cao.go.jp/chosei/shukujitsu/gaiyou.html>国民の祝日について - 内閣府</a> → <a href=https://github.com/code4fukui/day-es>Holiday.js</a></div>
-<div>APP：CC BY <a href='https://fukuno.jig.jp/2855'>fukuno.jig.jp</a> (<a href=https://github.com/code4fukui/facilinow/>src on GitHub</a>)</div>
-</div>
-<script type="module" src="https://taisukef.github.io/qrcode-generator/es/qr-code.js"></script>
 <qr-code></qr-code>
 
 </div>
+
 
 </body>
 </html>
