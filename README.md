@@ -1,4 +1,7 @@
 # facilinow
+
+> 日本語のREADMEはこちらです: [README.ja.md](README.ja.md)
+
 Fukui Prefecture Facility Dashboard
 
 ## Features
